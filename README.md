@@ -1,3 +1,5 @@
+Online : https://marulamsamosir.github.io/codecraft/
+
 # CodeCraft Beautifier
 
 > **Instant, online code formatter** untuk HTML, CSS, JavaScript, PHP, JSON, SQL, dan Java.
