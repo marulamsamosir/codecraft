@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeCraft — Code Beautifier</title>
+
+  <link rel="icon" type="image/x-icon" href="assets/imgs/icon.png">
+
+  <!-- Fonts -->
+  <link href="assets/googleapis/css2/jetbrainsmono/style.css" rel="stylesheet" />
+  <link href="assets/googleapis/css2/syne/style.css" rel="stylesheet" />
+
+  <!-- CDN Libraries -->
+  <!-- jQuery -->
+  <script src="assets/cloudflare/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- js-beautify (HTML, CSS, JS) -->
+  <script src="assets/cloudflare/ajax/libs/js-beautify/1.15.1/beautify.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/js-beautify/1.15.1/beautify-css.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/js-beautify/1.15.1/beautify-html.min.js"></script>
+
+  <!-- sql-formatter -->
+  <script src="assets/cloudflare/ajax/libs/sql-formatter/15.3.2/sql-formatter.min.js"></script>
+
+  <!-- Prism.js for syntax highlighting (Output) -->
+  <link rel="stylesheet" href="assets/cloudflare/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+  <script src="assets/cloudflare/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <!-- NOISE OVERLAY -->
+  <div class="noise-overlay"></div>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="11" height="11" rx="2" fill="var(--accent)"/>
+            <rect x="15" y="2" width="11" height="11" rx="2" fill="var(--accent-dim)"/>
+            <rect x="2" y="15" width="11" height="11" rx="2" fill="var(--accent-dim)"/>
+            <rect x="15" y="15" width="11" height="11" rx="2" fill="var(--accent)"/>
+          </svg>
+        </span>
+        <span class="brand-name">Code<em>Craft</em></span>
+        <span class="brand-tag">BEAUTIFIER</span>
+      </div>
+      <nav class="header-nav">
+        <span class="nav-hint">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="var(--accent)" stroke-width="1.5"/>
+            <path d="M7 6v4M7 4.5v.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Instant Online Formatting
+        </span>
+        <button class="btn-clear" id="btnClearAll" title="Clear all">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Clear
+        </button>
+      </nav>
+    </div>
+    <!-- Animated progress line -->
+    <div class="header-progress" id="headerProgress"></div>
+  </header>
+
+  <!-- LANGUAGE SELECTOR BAR -->
+  <section class="lang-bar">
+    <div class="lang-bar-inner">
+      <span class="lang-label">Language</span>
+      <div class="lang-tabs" id="langTabs">
+
+        <button class="lang-tab active" data-lang="html">
+          <span class="lang-dot html-dot"></span>HTML
+        </button>
+        <button class="lang-tab" data-lang="css">
+          <span class="lang-dot css-dot"></span>CSS
+        </button>
+        <button class="lang-tab" data-lang="javascript">
+          <span class="lang-dot js-dot"></span>JavaScript
+        </button>
+        <button class="lang-tab" data-lang="php">
+          <span class="lang-dot php-dot"></span>PHP
+        </button>
+        <button class="lang-tab" data-lang="json">
+          <span class="lang-dot json-dot"></span>JSON
+        </button>
+        <button class="lang-tab" data-lang="sql">
+          <span class="lang-dot sql-dot"></span>SQL
+        </button>
+        <button class="lang-tab" data-lang="java">
+          <span class="lang-dot java-dot"></span>Java
+        </button>
+
+      </div>
+
+      <div class="lang-options">
+        <label class="opt-label">
+          <span>Indent</span>
+          <select id="indentSize" class="opt-select">
+            <option value="2" selected>2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="tab">Tab</option>
+          </select>
+        </label>
+        <label class="opt-check">
+          <input type="checkbox" id="wrapLines" />
+          <span class="check-box"></span>
+          Wrap Lines
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN EDITOR AREA -->
+  <main class="editor-main">
+
+    <!-- INPUT PANEL -->
+    <div class="panel panel-input">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="panel-dot input-dot"></span>
+          INPUT
+          <span class="panel-lang-badge" id="inputBadge">HTML</span>
+        </span>
+        <div class="panel-actions">
+          <button class="panel-btn" id="btnPaste" title="Paste from clipboard">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <rect x="4" y="1" width="7" height="3" rx="1" stroke="currentColor" stroke-width="1.3"/>
+              <rect x="2" y="3" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M5 7h5M5 9.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            Paste
+          </button>
+          <button class="panel-btn" id="btnClearInput" title="Clear input">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M2 2l11 11M13 2L2 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="editor-wrapper">
+        <div class="line-numbers" id="lineNumbersInput"></div>
+        <textarea
+          id="codeInput"
+          class="code-textarea"
+          placeholder="&#x2768; Paste your messy code here...&#10;&#10;Supports: HTML · CSS · JavaScript · PHP · JSON · SQL · Java&#10;&#10;Formatting happens instantly as you type!"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+        ></textarea>
+      </div>
+      <div class="panel-footer">
+        <span class="stat" id="inputChars">0 chars</span>
+        <span class="stat" id="inputLines">0 lines</span>
+        <span class="status-idle" id="formatStatus">Ready</span>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="editor-divider">
+      <div class="divider-line"></div>
+      <button class="divider-btn" id="btnBeautify" title="Beautify Now">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- OUTPUT PANEL -->
+    <div class="panel panel-output">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="panel-dot output-dot"></span>
+          OUTPUT
+          <span class="panel-lang-badge success" id="outputBadge">HTML</span>
+        </span>
+        <div class="panel-actions">
+          <button class="panel-btn" id="btnCopy" title="Copy to clipboard">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <rect x="5" y="5" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M10 5V3.5A1.5 1.5 0 0 0 8.5 2h-5A1.5 1.5 0 0 0 2 3.5v5A1.5 1.5 0 0 0 3.5 10H5" stroke="currentColor" stroke-width="1.3"/>
+            </svg>
+            Copy
+          </button>
+          <button class="panel-btn" id="btnDownload" title="Download file">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <path d="M7.5 2v8M4 7l3.5 3.5L11 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 12h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            Download
+          </button>
+          <button class="panel-btn toggle-btn" id="btnToggleHighlight" title="Toggle syntax highlight">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M5 7.5l2 2 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Highlight
+          </button>
+        </div>
+      </div>
+
+      <!-- Plain text output (copyable) -->
+      <div class="editor-wrapper" id="outputPlain">
+        <div class="line-numbers" id="lineNumbersOutput"></div>
+        <textarea
+          id="codeOutput"
+          class="code-textarea output-textarea"
+          readonly
+          placeholder="✦ Beautified code will appear here..."
+          spellcheck="false"
+        ></textarea>
+      </div>
+
+      <!-- Highlighted output -->
+      <div class="editor-wrapper highlighted-wrapper hidden" id="outputHighlighted">
+        <pre class="highlighted-pre" id="highlightedPre"><code id="highlightedCode" class="language-html"></code></pre>
+      </div>
+
+      <div class="panel-footer">
+        <span class="stat" id="outputChars">0 chars</span>
+        <span class="stat" id="outputLines">0 lines</span>
+        <span class="format-time" id="formatTime"></span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span class="toast-msg" id="toastMsg">Copied!</span>
+  </div>
+
+  <!-- ERROR MODAL -->
+  <div class="modal-backdrop hidden" id="errorModal">
+    <div class="modal-box">
+      <div class="modal-icon">⚠</div>
+      <h3 class="modal-title">Formatting Error</h3>
+      <p class="modal-msg" id="errorMsg"></p>
+      <button class="modal-close" id="modalClose">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <span>CodeCraft Beautifier — Supports HTML · CSS · JS · PHP · JSON · SQL · Java</span>
+    <span class="footer-right">Built with jQuery · js-beautify · sql-formatter · Prism.js</span>
+  </footer>
+
+  <!-- App Scripts -->
+  <script src="assets/js/beautifier-config.js"></script>
+  <script src="assets/js/app.js"></script>
+
+</body>
+</html>
